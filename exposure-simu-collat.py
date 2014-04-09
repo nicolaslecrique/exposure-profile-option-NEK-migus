@@ -1,7 +1,6 @@
 
 import random
 import numpy as np
-#import scipy.stats as ss
 from math import * 
 import matplotlib.pyplot as plt
 
@@ -42,24 +41,26 @@ def OptionPrice(S0, K, r, sigma, T):
     d1 = (log_moneyness + (r + sigma**2 / 2) * T)/(sigma * sqrt_t)
     d2 = (log_moneyness + (r - sigma**2 / 2) * T) / (sigma * sqrt_t)
 
-#    return S0 * ss.norm.cdf(d1) - K * np.exp(-r * T) * ss.norm.cdf(d2)
     return S0 * norm_cdf(d1) - K * np.exp(-r * T) * norm_cdf(d2)
 
 
-
+'''parameters used for option pricing'''
 T = 5.
 K = 100
 S0 = 100.
 r = 0.01
 sigma = 0.3
-step_size = 1./12
-nb_simu = 1000
 
-'''historical rate and vol for underlying'''
+#NB : the step size match the risk margin period 
+step_size = 1./12
+nb_simu = 100000
+
+'''historical rate and vol for underlying simulation'''
 histo_r = 0.02
 histo_sigma = 0.2
 
-useCollat = False
+useCollat = True
+#useCollat = False
 
 initPrice = OptionPrice(S0,K,r,sigma, T)
 
@@ -93,13 +94,17 @@ for date in dates:
     exposure_90.append(quantile_option_90)
     exposure_50.append(quantile_option_50)
     
-    '''switch array pointers'''
+    '''switch array pointers to prevent full copy of array at each date'''
     temp = previousOptionPrices;
     previousOptionPrices = currentOptionPrices
     currentOptionPrices = temp
 
+
+'''Display graphs'''
 plt.figure("Exposure Profile - With Collateral, 1 month margin perdiod of risk")
-plt.title("Exposure Profile - With Collateral, 1 month margin perdiod of risk")
+plt.title("Exposure Profile - Without Collateral, 1 month margin perdiod of risk")
+#plt.figure("Exposure Profile - Without Collateral")
+#plt.title("Exposure Profile - Without Collateral")
 plt.plot(dates, exposure_99, label = "99%")
 plt.plot(dates, exposure_95, label = "95%")
 plt.plot(dates, exposure_90, label = "90%")
